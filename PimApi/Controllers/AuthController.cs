@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -45,13 +46,27 @@ namespace PimApi.Controllers
             return Unauthorized();
         }
 
+        // GET: api/Auth/status
+        [HttpGet("status")]
+        [Authorize]
+        public IActionResult VerifyToken()
+        {
+            return Ok(new
+            {
+                Mensagem = "Token Válido! Você está autenticado.",
+                Usuario = User.Identity?.Name,
+                Id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")
+            });
+        }
+
         private string GenerateJwtToken(AppUser user)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName!),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id) // Guardamos o ID para usar na Playlist
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -69,7 +84,15 @@ namespace PimApi.Controllers
         }
     }
 
+    public class LoginDto
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
 
-    public class LoginDto { public string Email { get; set; } = ""; public string Password { get; set; } = ""; }
-    public class RegisterDto { public string Email { get; set; } = ""; public string Password { get; set; } = ""; }
+    public class RegisterDto
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
 }

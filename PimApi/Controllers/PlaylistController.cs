@@ -18,7 +18,19 @@ namespace PimApi.Controllers
             _playlistRepository = playlistRepository;
         }
 
-        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+private string GetUserId()
+        {
+
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+
+            if (string.IsNullOrEmpty(id))
+            {
+                id = User.FindFirstValue("sub");
+            }
+            
+            return id!; 
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Playlist>>> GetPlaylists()

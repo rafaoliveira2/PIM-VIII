@@ -16,7 +16,7 @@ namespace PimApi.Repositories
             _context = context;
         }
 
-        public async Task<Playlist> CriarPlaylistAsync(Playlist playlist, string userId)
+public async Task<Playlist> CriarPlaylistAsync(Playlist playlist, string userId)
         {
             playlist.AppUserId = userId;
             _context.Playlists.Add(playlist);
